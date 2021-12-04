@@ -1,0 +1,8 @@
+credentials/
+node_modules/
+
+.env
+package-lock.json
+
+#not needed :)
+test.js
