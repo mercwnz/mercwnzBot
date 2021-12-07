@@ -41,7 +41,7 @@ client.on('message', (channel, tags, message, self) => {
 
 			sheet.updateWithValues([
 				{
-					range: "Parsed!C10",//stream start
+					range: "Variables!B2",//STREAM_START
 					values: [[ss]]
 				}
 			]);
@@ -53,16 +53,12 @@ client.on('message', (channel, tags, message, self) => {
 
 			console.log(colors.fg.red, "Die update\t", colors.reset, die[1]);
 
-			sheet.appendWithValue("Deaths!A:A",[[moment().format("YYYY-MM-DD"),moment().unix()]]);
+			sheet.appendWithValue("Deaths!A:A",[[moment().unix(),moment().format("YYYY-MM-DD HH:mm:ss")]]);
 
 			sheet.updateWithValues([
 				{
-					range: "Parsed!C5",//current deaths
+					range: "Parsed!B2",//current deaths
 					values: [[die[1]]]
-				},
-				{
-					range: "Parsed!C12",//last death
-					values: [[moment().format("HH:mm:ss")]]
 				}
 			]);
 
@@ -74,7 +70,7 @@ client.on('message', (channel, tags, message, self) => {
 			}, 2000);
 		}
 
-		mpd = message.match(/^!mpd (\d+) (\d+) (\d+)/i); //!ps timeLimit current target
+		mpd = message.match(/^!mpd (\d+) (\d+)/i); //!ps timeLimit target
 
 		if(mpd){
 
@@ -82,44 +78,58 @@ client.on('message', (channel, tags, message, self) => {
 
 			sheet.updateWithValues([
 				{
-					range: "Parsed!C11",//Time start
-					values: [[moment().format("HH:mm:ss")]]
+					range: "Variables!B3",//PREDICTION_START
+					values: [[moment().unix()]]
 				},
 				{
-					range: "Parsed!C8",//Time limit
+					range: "Variables!B10",//PREDICTION_TIMELIMIT
 					values: [[mpd[1]]]
-				},
-				{
-					range: "Parsed!C4",//Start Deaths
+				},				{
+					range: "Variables!B8",//PREDICTION_DEATHS_TARGET
 					values: [[mpd[2]]]
 				},
-				{
-					range: "Parsed!C5",//Current Deaths
-					values: [[mpd[2]]]
-				},
-				{
-					range: "Parsed!C6",//prediction target
-					values: [[mpd[3]]]
-				}
+
 			]);
 
 			client.say("mercwnz","MpD sheet updated!");
+			/*
+				start timer and toggle tracking
+			*/
 		}
 
-		start = message.match(/^!start/);
+		/*
+			if mpd target matched
+			of if timer finished
+				say to channel
+				and stop tracking
+		*/
 
-		if(start){
-
-			console.log(colors.fg.cyan, "Update stream start\t", colors.reset, moment().format("HH:mm:ss"));
-
-			sheet.updateWithValues([
-				{
-					range: "Parsed!C10",//Time start
-					values: [[moment().format("HH:mm:ss")]]
-				}
-			]);
-
-			client.say(channel,"Time updated!")
-		}
 	}
+
+	deaths = message.match(/^!deaths$/);
+
+	if(deaths){
+		console.log(colors.fg.green, "!deaths command triggered by\t", colors.reset, tags.username);
+
+		setTimeout(() => {
+			sheet.getCell(client,"Phrases!A3",{
+				"command":"say",
+				"channel":channel
+			})
+		}, 2000);
+	}
+
+	life = message.match(/^!life$/);
+
+	if(life){
+		console.log(colors.fg.green, "!life command triggered by\t", colors.reset, tags.username);
+
+		setTimeout(() => {
+			sheet.getCell(client,"Phrases!A2",{
+				"command":"say",
+				"channel":channel
+			})
+		}, 2000);
+	}
+
 });

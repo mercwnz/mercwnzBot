@@ -1,6 +1,6 @@
 {
   "name": "mercwnzBot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "a twitch bot w/ googleapi sheet db",
   "main": "index.js",
   "scripts": {
