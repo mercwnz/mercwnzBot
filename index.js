@@ -16,7 +16,10 @@ const client = new tmi.Client({
 		username: 'mercwnzBOT',
 		password: process.env.TWITCH_OAUTH_TOKEN
 	},
-	channels: ['mercwnz','pnkyfish']
+	channels: [
+		'mercwnz',
+		'pnkyfish'
+	]
 });
 
 console.log("Connect to IRC");
@@ -30,6 +33,7 @@ client.on('message', (channel, tags, message, self) => {
 		|| (tags.username === 'mercwnz')
 		|| (tags.username === 'StreamElements')
 	){
+
 		uptime = message.match(/has been streaming for (\d+) hours (\d+) mins/i);
 
 		if(uptime){
@@ -42,7 +46,11 @@ client.on('message', (channel, tags, message, self) => {
 			sheet.updateWithValues([
 				{
 					range: "Variables!B2",//STREAM_START
-					values: [[ss]]
+					values: [
+						[
+							ss
+						]
+					]
 				}
 			]);
 		}
@@ -53,19 +61,20 @@ client.on('message', (channel, tags, message, self) => {
 
 			console.log(colors.fg.red, "Die update\t", colors.reset, die[1]);
 
-			sheet.appendWithValue("Deaths!A:A",[[moment().unix(),moment().format("YYYY-MM-DD HH:mm:ss")]]);
-
-			sheet.updateWithValues([
-				{
-					range: "Parsed!B2",//current deaths
-					values: [[die[1]]]
-				}
-			]);
+			sheet.appendWithValue(
+				"Deaths!A:A",
+				[
+					[
+						moment().unix(),
+						moment().format("YYYY-MM-DD HH:mm:ss")
+					]
+				]
+			);
 
 			setTimeout(() => {
-				sheet.getCell(client,"Phrases!A1",{
-					"command":"say",
-					"channel":channel
+				sheet.getCell(client, "Variables!A1",{
+					"command" : "say",
+					"channel" : channel
 				})
 			}, 2000);
 		}
@@ -79,19 +88,33 @@ client.on('message', (channel, tags, message, self) => {
 			sheet.updateWithValues([
 				{
 					range: "Variables!B3",//PREDICTION_START
-					values: [[moment().unix()]]
+					values: [
+						[
+							moment().unix()
+						]
+					]
 				},
 				{
 					range: "Variables!B10",//PREDICTION_TIMELIMIT
-					values: [[mpd[1]]]
-				},				{
+					values: [
+						[
+							mpd[1]
+						]
+					]
+				},	
+				{
 					range: "Variables!B8",//PREDICTION_DEATHS_TARGET
-					values: [[mpd[2]]]
+					values: [
+						[
+							mpd[2]
+						]
+					]
 				},
 
 			]);
 
-			client.say("mercwnz","MpD sheet updated!");
+			client.say(channel, "MpD sheet updated!");
+			
 			/*
 				start timer and toggle tracking
 			*/
@@ -109,26 +132,34 @@ client.on('message', (channel, tags, message, self) => {
 	deaths = message.match(/^!deaths$/);
 
 	if(deaths){
+
 		console.log(colors.fg.green, "!deaths command triggered by\t", colors.reset, tags.username);
 
 		setTimeout(() => {
-			sheet.getCell(client,"Phrases!A3",{
-				"command":"say",
-				"channel":channel
-			})
+			sheet.getCell(
+				client,
+				"Phrases!A3",{
+					"command" : "say",
+					"channel" : channel
+				}
+			)
 		}, 2000);
 	}
 
 	life = message.match(/^!life$/);
 
 	if(life){
+
 		console.log(colors.fg.green, "!life command triggered by\t", colors.reset, tags.username);
 
 		setTimeout(() => {
-			sheet.getCell(client,"Phrases!A2",{
-				"command":"say",
-				"channel":channel
-			})
+			sheet.getCell(
+				client,
+				"Phrases!A2",{
+					"command" : "say",
+					"channel" : channel
+				}
+			)
 		}, 2000);
 	}
 
