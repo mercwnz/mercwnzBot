@@ -172,7 +172,7 @@ client.on('message', (channel, tags, message, self) => {
 		setTimeout(() => {
 			sheet.getCell(
 				client,
-				"Phrases!A4",{
+				"Phrases!A5",{
 					"command" : "say",
 					"channel" : channel
 				}
