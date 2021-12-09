@@ -31,7 +31,7 @@ client.on('message', (channel, tags, message, self) => {
 	if(
 		(tags.username === 'pnkyfish')
 		|| (tags.username === 'mercwnz')
-		|| (tags.username === 'StreamElements')
+		|| (tags.username === 'streamelements')
 	){
 
 		uptime = message.match(/has been streaming for (\d+) hours (\d+) mins/i);
@@ -72,14 +72,14 @@ client.on('message', (channel, tags, message, self) => {
 			);
 
 			setTimeout(() => {
-				sheet.getCell(client, "Variables!A1",{
+				sheet.getCell(client, "Phrases!A1",{
 					"command" : "say",
 					"channel" : channel
 				})
 			}, 2000);
 		}
 
-		mpd = message.match(/^!mpd (\d+) (\d+)/i); //!ps timeLimit target
+		mpd = message.match(/^!mpd (\d+) (\d+)/i); //!mpd timeLimit target
 
 		if(mpd){
 
@@ -156,6 +156,40 @@ client.on('message', (channel, tags, message, self) => {
 			sheet.getCell(
 				client,
 				"Phrases!A2",{
+					"command" : "say",
+					"channel" : channel
+				}
+			)
+		}, 2000);
+	}
+
+	mpd = message.match(/^!mpd$/);
+
+	if(mpd){
+
+		console.log(colors.fg.green, "!mpd command triggered by\t", colors.reset, tags.username);
+
+		setTimeout(() => {
+			sheet.getCell(
+				client,
+				"Phrases!A4",{
+					"command" : "say",
+					"channel" : channel
+				}
+			)
+		}, 2000);
+	}
+
+	left = message.match(/^!left$/);
+
+	if(left){
+
+		console.log(colors.fg.green, "!left command triggered by\t", colors.reset, tags.username);
+
+		setTimeout(() => {
+			sheet.getCell(
+				client,
+				"Phrases!A4",{
 					"command" : "say",
 					"channel" : channel
 				}
