@@ -1,12 +1,12 @@
 require('dotenv').config();
 
-const tmi = require('tmi.js');
 const moment = require('moment');
 
-const sheet = require('./lib/sheet');
+const sheet = require('./lib/googleSheet');
 const colors = require('./lib/colors');
 
-const client = new tmi.Client({
+const tmi = require('tmi.js');
+const twitchChat = new tmi.Client({
 	options: { debug: true },
 	connection: {
 		secure: true,
@@ -23,8 +23,9 @@ const client = new tmi.Client({
 });
 
 console.log("Connect to IRC");
-client.connect();
-client.on('message', (channel, tags, message, self) => {
+
+twitchChat.connect();
+twitchChat.on('message', (channel, tags, message, self) => {
 
 	if(self) return;
 
@@ -72,7 +73,7 @@ client.on('message', (channel, tags, message, self) => {
 			);
 
 			setTimeout(() => {
-				sheet.getCell(client, "Phrases!A1",{
+				sheet.getCell(twitchChat, "Phrases!A1",{
 					"command" : "say",
 					"channel" : channel
 				})
@@ -113,19 +114,27 @@ client.on('message', (channel, tags, message, self) => {
 
 			]);
 
-			client.say(channel, "MpD sheet updated!");
+			twitchChat.say(channel, "MpD sheet updated!");
 			
 			/*
 				start timer and toggle tracking
 			*/
 		}
 
-		/*
-			if mpd target matched
-			of if timer finished
-				say to channel
-				and stop tracking
-		*/
+		event = message.match(/^!event (.*)/i)
+
+		if(event){
+
+			sheet.appendWithValue(
+				"Events!A:A",
+				[
+					[
+						moment().unix(),
+						event[1]
+					]
+				]
+			);
+		}
 
 	}
 
@@ -137,7 +146,7 @@ client.on('message', (channel, tags, message, self) => {
 
 		setTimeout(() => {
 			sheet.getCell(
-				client,
+				twitchChat,
 				"Phrases!A3",{
 					"command" : "say",
 					"channel" : channel
@@ -154,7 +163,7 @@ client.on('message', (channel, tags, message, self) => {
 
 		setTimeout(() => {
 			sheet.getCell(
-				client,
+				twitchChat,
 				"Phrases!A2",{
 					"command" : "say",
 					"channel" : channel
@@ -171,7 +180,7 @@ client.on('message', (channel, tags, message, self) => {
 
 		setTimeout(() => {
 			sheet.getCell(
-				client,
+				twitchChat,
 				"Phrases!A5",{
 					"command" : "say",
 					"channel" : channel
@@ -188,7 +197,7 @@ client.on('message', (channel, tags, message, self) => {
 
 		setTimeout(() => {
 			sheet.getCell(
-				client,
+				twitchChat,
 				"Phrases!A4",{
 					"command" : "say",
 					"channel" : channel
