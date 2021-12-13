@@ -23,7 +23,6 @@ const twitchChat = new tmi.Client({
 });
 
 console.log("Connect to IRC");
-
 twitchChat.connect();
 twitchChat.on('message', (channel, tags, message, self) => {
 
