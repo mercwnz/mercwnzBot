@@ -13,7 +13,7 @@ const twitchChat = new tmi.Client({
 		reconnect: true
 	},
 	identity: {
-		username: 'mercwnzBOT',
+		username: process.env.TWITCH_USERNAME,
 		password: process.env.TWITCH_OAUTH_TOKEN
 	},
 	channels: [
