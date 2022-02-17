@@ -1,208 +1,66 @@
 require('dotenv').config();
 
-const moment = require('moment');
+const { MongoClient } = require("mongodb");
+const mongoose = require('mongoose');
 
-const sheet = require('./lib/googleSheet');
-const colors = require('./lib/colors');
+const uri =
+	"mongodb://"+process.env.MONGO_USERNAME+":"+process.env.MONGO_PASSWORD+"@"+process.env.MONGO_ADDR+"/?retryWrites=true&w=majority";
 
-const tmi = require('tmi.js');
-const twitchChat = new tmi.Client({
-	options: { debug: true },
-	connection: {
-		secure: true,
-		reconnect: true
-	},
-	identity: {
-		username: process.env.TWITCH_USERNAME,
-		password: process.env.TWITCH_OAUTH_TOKEN
-	},
-	channels: [
-		'mercwnz',
-		'pnkyfish'
-	]
-});
 
-console.log("Connect to IRC");
-twitchChat.connect();
-twitchChat.on('message', (channel, tags, message, self) => {
 
-	if(self) return;
 
-	if(
-		(tags.username === 'pnkyfish')
-		|| (tags.username === 'mercwnz')
-		|| (tags.username === 'streamelements')
-	){
+// https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/mongoose
 
-		uptime = message.match(/has been streaming for (\d+) hours (\d+) mins/i);
+//of
 
-		if(uptime){
+//https://docs.mongodb.com/drivers/node/current/usage-examples/insertOne/
 
-			let t = moment.duration(uptime[1].padStart(2, '0')+":"+uptime[2].padStart(2, '0')+":00");
-			let ss = moment().subtract(t).format("HH:mm:ss");
 
-			console.log(colors.fg.green, "Stream Start updated\t", colors.reset, ss);
 
-			sheet.updateWithValues([
-				{
-					range: "Variables!B2",//STREAM_START
-					values: [
-						[
-							ss
-						]
-					]
-				}
-			]);
-		}
 
-		die = message.match(/pnkyfish just died again. She has now died (\d+) times/i);
+// const client = new MongoClient(uri);
 
-		if(die){
+// async function insertDeath() {
+// 	try {
+// 		await client.connect();
+// 		const database = client.db("pnkyfish");
+// 		const deaths = database.collection("deaths");
 
-			console.log(colors.fg.red, "Die update\t", colors.reset, die[1]);
+// 		const doc = {
+// 			TOD: new Date()
+// 		}
 
-			sheet.appendWithValue(
-				"Deaths!A:A",
-				[
-					[
-						moment().unix(),
-						moment().format("YYYY-MM-DD HH:mm:ss")
-					]
-				]
-			);
+// 		const result = await deaths.insertOne(doc);
 
-			setTimeout(() => {
-				sheet.getCell(twitchChat, "Phrases!A1",{
-					"command" : "say",
-					"channel" : channel
-				})
-			}, 2000);
-		}
+// 		console.log(`A document was inserted with the _id: ${result.insertedId}`);
+// 	}
 
-		mpd = message.match(/^!mpd (\d+) (\d+)/i); //!mpd timeLimit target
+// 	finally {
+// 		await client.close();
+// 	}
+// }
 
-		if(mpd){
+// // insertDeath().catch(console.dir);
 
-			console.log(colors.fg.cyan, "MpD sheet updated\t", colors.reset, mpd[0]);
 
-			sheet.updateWithValues([
-				{
-					range: "Variables!B3",//PREDICTION_START
-					values: [
-						[
-							moment().unix()
-						]
-					]
-				},
-				{
-					range: "Variables!B10",//PREDICTION_TIMELIMIT
-					values: [
-						[
-							mpd[1]
-						]
-					]
-				},	
-				{
-					range: "Variables!B8",//PREDICTION_DEATHS_TARGET
-					values: [
-						[
-							mpd[2]
-						]
-					]
-				},
+// async function countCurrentDeaths() {
+// 	try {
+// 		await client.connect();
+// 		const database = client.db("pnkyfish");
+// 		const deaths = database.collection("deaths");
 
-			]);
+// 		const result = await deaths.find({
+// 			releasedata: {
+// 				$gte: ISODate("2010-04-29T00:00:00.000Z"),
+// 				$lt: ISODate("2010-05-01T00:00:00.000Z")
+// 			}
+// 		}).count();
 
-			twitchChat.say(channel, "MpD sheet updated!");
-			
-			/*
-				start timer and toggle tracking
-			*/
-		}
+// 		console.log(`A document was inserted with the _id: ${result}`);
+// 	}
 
-		event = message.match(/^!event (.*)/i)
-
-		if(event){
-
-			sheet.appendWithValue(
-				"Events!A:A",
-				[
-					[
-						moment().unix(),
-						event[1]
-					]
-				]
-			);
-		}
-
-	}
-
-	deaths = message.match(/^!deaths$/);
-
-	if(deaths){
-
-		console.log(colors.fg.green, "!deaths command triggered by\t", colors.reset, tags.username);
-
-		setTimeout(() => {
-			sheet.getCell(
-				twitchChat,
-				"Phrases!A3",{
-					"command" : "say",
-					"channel" : channel
-				}
-			)
-		}, 2000);
-	}
-
-	life = message.match(/^!life$/);
-
-	if(life){
-
-		console.log(colors.fg.green, "!life command triggered by\t", colors.reset, tags.username);
-
-		setTimeout(() => {
-			sheet.getCell(
-				twitchChat,
-				"Phrases!A2",{
-					"command" : "say",
-					"channel" : channel
-				}
-			)
-		}, 2000);
-	}
-
-	mpd = message.match(/^!mpd$/);
-
-	if(mpd){
-
-		console.log(colors.fg.green, "!mpd command triggered by\t", colors.reset, tags.username);
-
-		setTimeout(() => {
-			sheet.getCell(
-				twitchChat,
-				"Phrases!A5",{
-					"command" : "say",
-					"channel" : channel
-				}
-			)
-		}, 2000);
-	}
-
-	left = message.match(/^!left$/);
-
-	if(left){
-
-		console.log(colors.fg.green, "!left command triggered by\t", colors.reset, tags.username);
-
-		setTimeout(() => {
-			sheet.getCell(
-				twitchChat,
-				"Phrases!A4",{
-					"command" : "say",
-					"channel" : channel
-				}
-			)
-		}, 2000);
-	}
-
-});
+// 	finally {
+// 		await client.close();
+// 	}
+// }
+// countCurrentDeaths().catch(console.dir);
