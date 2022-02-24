@@ -9,4 +9,5 @@ test*
 /test
 py/*.json
 
-*.sublime*
+mercwnzbotproject.sublime-project
+mercwnzbotproject.sublime-workspace
